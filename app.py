@@ -4,6 +4,10 @@ os.environ["TRANSFORMERS_NO_TF"] = "1"
 
 import streamlit as st
 from transformers import pipeline
+
+# Use device=0 to force GPU or device=-1 for CPU
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", framework="pt")
+
 import PyPDF2
 
 # Set Streamlit page config
@@ -70,3 +74,4 @@ if uploaded_file is not None:
             st.write(summary)
 else:
     st.info("📤 Please upload a PDF file to get started.")
+
