@@ -84,18 +84,24 @@ if uploaded_file is not None:
         max_length = 250
 
     # Summarize the text
-    if st.button("🚀 Generate Summary"):
-        with st.spinner("Summarizing... Please wait."):
-            summary = generate_summary(
+    # Summarize the text
+if st.button("🚀 Generate Summary"):
+    with st.spinner("Summarizing... Please wait."):
+        try:
+            summary = summarizer(
                 full_text,
                 max_length=max_length,
-                min_length=30
-            )
+                min_length=30,
+                do_sample=False
+            )[0]['summary_text']
 
+            # Show summary inside an expander
+            with st.expander("📝 View Summary"):
+                st.write(summary)
 
-        # Show summary inside an expander
-        with st.expander("📝 View Summary"):
-            st.write(summary)
+        except Exception as e:
+            st.error(f"⚠️ An error occurred: {e}")
+
 else:
     st.info("📤 Please upload a PDF file to get started.")
 
