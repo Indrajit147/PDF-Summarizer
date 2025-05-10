@@ -30,7 +30,7 @@ def generate_summary(text, max_length=300, min_length=100):
     return summary
 
 # Use device=0 to force GPU or device=-1 for CPU
-summarizer = pipeline("summarization", model="csebuetnlp/mT5_multilingual_XLSum")
+summarizer = pipeline("summarization", model="Falconsai/text_summarization")
 
 
 
