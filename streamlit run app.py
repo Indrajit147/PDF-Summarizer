@@ -12,9 +12,29 @@ def extract_text_from_pdf(pdf_file):
         text += page.extract_text()
     return text
 
+def chunk_text(text, max_chunk_length=1000):
+    paragraphs = text.split("\n")
+    chunks = []
+    current_chunk = ""
+    for para in paragraphs:
+        if len(current_chunk) + len(para) <= max_chunk_length:
+            current_chunk += para + "\n"
+        else:
+            chunks.append(current_chunk)
+            current_chunk = para + "\n"
+    if current_chunk:
+        chunks.append(current_chunk)
+    return chunks
+
 def generate_summary(text):
-    summary = summarizer(text, max_length=300, min_length=100, do_sample=False)
-    return summary[0]['summary_text']
+    chunks = chunk_text(text)
+    summary = ""
+    for chunk in chunks:
+        if len(chunk.strip()) == 0:
+            continue
+        summarized = summarizer(chunk, max_length=300, min_length=100, do_sample=False)
+        summary += summarized[0]['summary_text'] + " "
+    return summary
 
 # Streamlit UI setup
 st.title("PDF Summarizer")
@@ -41,3 +61,6 @@ if uploaded_file is not None:
         st.write(summary)
     else:
         st.error("No text could be extracted from the PDF. Please try a different file.")
+
+
+#streamlit run app.py
