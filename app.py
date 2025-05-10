@@ -5,6 +5,30 @@ os.environ["TRANSFORMERS_NO_TF"] = "1"
 import streamlit as st
 from transformers import pipeline
 
+def chunk_text(text, max_chunk_length=1000):
+    paragraphs = text.split("\n")
+    chunks = []
+    current_chunk = ""
+    for para in paragraphs:
+        if len(current_chunk) + len(para) <= max_chunk_length:
+            current_chunk += para + "\n"
+        else:
+            chunks.append(current_chunk)
+            current_chunk = para + "\n"
+    if current_chunk:
+        chunks.append(current_chunk)
+    return chunks
+
+def generate_summary(text, max_length=300, min_length=100):
+    chunks = chunk_text(text)
+    summary = ""
+    for chunk in chunks:
+        if len(chunk.strip()) == 0:
+            continue
+        summarized = summarizer(chunk, max_length=max_length, min_length=min_length, do_sample=False)
+        summary += summarized[0]['summary_text'] + " "
+    return summary
+
 # Use device=0 to force GPU or device=-1 for CPU
 summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", framework="pt")
 
@@ -62,12 +86,12 @@ if uploaded_file is not None:
     # Summarize the text
     if st.button("🚀 Generate Summary"):
         with st.spinner("Summarizing... Please wait."):
-            summary = summarizer(
+            summary = generate_summary(
                 full_text,
                 max_length=max_length,
-                min_length=30,
-                do_sample=False
-            )[0]['summary_text']
+                min_length=30
+            )
+
 
         # Show summary inside an expander
         with st.expander("📝 View Summary"):
