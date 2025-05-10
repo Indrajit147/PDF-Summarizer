@@ -30,7 +30,8 @@ def generate_summary(text, max_length=300, min_length=100):
     return summary
 
 # Use device=0 to force GPU or device=-1 for CPU
-summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", framework="pt")
+summarizer = pipeline("summarization", model="Falconsai/text_summarization")
+
 
 import PyPDF2
 
@@ -85,19 +86,28 @@ if uploaded_file is not None:
 
     # Summarize the text
     # Summarize the text
+def split_text(text, max_words=800):
+    words = text.split()
+    return [' '.join(words[i:i+max_words]) for i in range(0, len(words), max_words)]
+
 if st.button("🚀 Generate Summary"):
     with st.spinner("Summarizing... Please wait."):
         try:
-            summary = summarizer(
-                full_text,
-                max_length=max_length,
-                min_length=30,
-                do_sample=False
-            )[0]['summary_text']
+            chunks = split_text(full_text)
+            summaries = []
+            for chunk in chunks:
+                summary = summarizer(
+                    chunk,
+                    max_length=max_length,
+                    min_length=30,
+                    do_sample=False
+                )[0]['summary_text']
+                summaries.append(summary)
 
-            # Show summary inside an expander
+            final_summary = "\n\n".join(summaries)
+
             with st.expander("📝 View Summary"):
-                st.write(summary)
+                st.write(final_summary)
 
         except Exception as e:
             st.error(f"⚠️ An error occurred: {e}")
