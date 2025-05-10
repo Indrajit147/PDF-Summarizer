@@ -33,7 +33,6 @@ def generate_summary(text, max_length=300, min_length=100):
 summarizer = pipeline("summarization", model="Falconsai/text_summarization")
 
 
-
 import PyPDF2
 
 # Set Streamlit page config
@@ -99,7 +98,7 @@ if st.button("🚀 Generate Summary"):
             for chunk in chunks:
                 summary = summarizer(
                     chunk,
-                    max_length=int(len(chunk.split()) * 0.4),  # 40% of chunk length
+                    max_length=max_length,
                     min_length=30,
                     do_sample=False
                 )[0]['summary_text']
