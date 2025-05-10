@@ -1,63 +1,43 @@
-import os
-os.environ["TRANSFORMERS_NO_TF"] = "1"
-
-
 import streamlit as st
 from transformers import pipeline
-import PyPDF2
+from PyPDF2 import PdfReader
 
-# Initialize summarization pipeline
-st.title("📄 PDF Summarizer App")
+# Load the pre-trained summarizer model from Hugging Face
+summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
 
-st.write("""
-Welcome to the **PDF Summarizer App**!  
-Upload a PDF file and get an AI-generated summary in seconds.  
-_Built with Streamlit + Hugging Face Transformers._
-""")
+def extract_text_from_pdf(pdf_file):
+    reader = PdfReader(pdf_file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text()
+    return text
 
-# Load summarizer with caching
-@st.cache_resource
-def load_summarizer():
-    return pipeline("summarization", model="sshleifer/distilbart-cnn-12-6")
+def generate_summary(text):
+    summary = summarizer(text, max_length=300, min_length=100, do_sample=False)
+    return summary[0]['summary_text']
 
-summarizer = load_summarizer()
+# Streamlit UI setup
+st.title("PDF Summarizer")
+st.write("Upload your PDF to get a summary!")
 
-# Upload the PDF
-uploaded_file = st.file_uploader("👉 Upload your PDF file here", type=['pdf'])
-
+# File uploader widget
+uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 
 if uploaded_file is not None:
-    try:
-        # Extract text from PDF
-        pdf_reader = PyPDF2.PdfReader(uploaded_file)
-        text = ""
-        for page_num, page in enumerate(pdf_reader.pages):
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text
-
-        # Show preview of extracted text
-        if text:
-            st.subheader("📖 Extracted Text Preview (first 1000 characters):")
-            st.text(text[:1000] + "..." if len(text) > 1000 else text)
-
-            # Button to summarize
-            if st.button("🚀 Generate Summary"):
-                with st.spinner("AI is summarizing your document..."):
-                    # Truncate if text is too long (model limit ~1024 tokens)
-                    if len(text) > 3000:
-                        text = text[:3000]
-
-                    summary = summarizer(
-                        text,
-                        max_length=200,
-                        min_length=50,
-                        do_sample=False
-                    )[0]['summary_text']
-
-                st.subheader("📝 Summary:")
-                st.success(summary)
-        else:
-            st.warning("⚠️ No text could be extracted from the uploaded PDF.")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    # Extract text from the uploaded PDF
+    text = extract_text_from_pdf(uploaded_file)
+    
+    # Check if text extraction was successful
+    if text.strip():
+        # Show original text preview (optional)
+        st.subheader("Original Text")
+        st.write(text[:1500])  # Display the first 1500 characters of the extracted text
+        
+        # Generate summary
+        summary = generate_summary(text)
+        
+        # Display the summary
+        st.subheader("Summary")
+        st.write(summary)
+    else:
+        st.error("No text could be extracted from the PDF. Please try a different file.")
