@@ -3,3 +3,5 @@ transformers
 torch
 tensorflow
 PyPDF2
+tf-keras
+
