@@ -1,8 +1,6 @@
-# PDF-Summarizer
-
 # PDF Summarizer
 
-A web application built using **Streamlit** for summarizing PDF documents using AI. The app allows users to upload a PDF file, processes the file, and generates a concise summary of its contents. The underlying model used for summarization is based on the **DistilBART** transformer model, fine-tuned for text summarization tasks.
+A web application built using **Streamlit** for summarizing PDF documents using AI. The app allows users to upload a PDF file, process the file, and generate a concise summary of its contents. The underlying model used for summarization is based on the **DistilBART** transformer model, fine-tuned for text summarization tasks.
 
 ## Features
 
