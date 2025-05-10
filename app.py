@@ -34,7 +34,9 @@ if uploaded_file is not None:
     pdf_reader = PyPDF2.PdfReader(uploaded_file)
     full_text = ""
     for page in pdf_reader.pages:
-        full_text += page.extract_text()
+        text = page.extract_text()
+        if text:
+            full_text += text
 
     # Display file info
     st.subheader("📂 Uploaded File Info")
@@ -56,11 +58,15 @@ if uploaded_file is not None:
     # Summarize the text
     if st.button("🚀 Generate Summary"):
         with st.spinner("Summarizing... Please wait."):
-            summary = summarizer(full_text, max_length=max_length, min_length=30, do_sample=False)[0]['summary_text']
+            summary = summarizer(
+                full_text,
+                max_length=max_length,
+                min_length=30,
+                do_sample=False
+            )[0]['summary_text']
 
         # Show summary inside an expander
         with st.expander("📝 View Summary"):
             st.write(summary)
 else:
     st.info("📤 Please upload a PDF file to get started.")
-
